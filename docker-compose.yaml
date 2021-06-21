@@ -3,3 +3,26 @@ services:
   redis:
     image: redis
     restart: always
+    container_name: 'redis'
+  celery:
+    build: .
+    restart: always
+    container_name: 'celery_worker'
+    command: celery -A tasks worker --loglevel=info
+    links:
+      - redis
+    env_file:
+      - .env
+    depends_on:
+      - redis
+  beat:
+    build: .
+    restart: always
+    container_name: 'celery_beat'
+    command: celery -A tasks beat --loglevel=info
+    links:
+      - redis
+    env_file:
+      - .env
+    depends_on:
+      - redis
