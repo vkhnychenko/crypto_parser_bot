@@ -8,7 +8,6 @@ def check_total(obj: list):
     amount = 0
     total = 0
     for i in obj:
-        logging.info(i)
         total += reduce(lambda x, y: float(x) * float(y), i)
         amount += float(i[1])
         if amount >= TOTAL_COIN:
