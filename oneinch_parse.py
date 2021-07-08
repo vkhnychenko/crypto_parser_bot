@@ -2,7 +2,7 @@ import requests
 from config import INCH_QUOTE_URL, USDT, SST
 
 
-def get_1inch_price(from_token, to_token, amount_from, decimal_from):
+def get_1inch_price(from_token, to_token, amount_from, decimal_from, sell:bool = None):
     payload = {
         "fromTokenAddress": from_token,
         "toTokenAddress": to_token,
@@ -13,6 +13,8 @@ def get_1inch_price(from_token, to_token, amount_from, decimal_from):
         resp.raise_for_status()
         data = resp.json()
         price_token = int(data["toTokenAmount"]) / 10 ** data["toToken"]["decimals"]
+        if sell:
+            return price_token / amount_from
         return amount_from/price_token
     except Exception as e:
         print(e)
