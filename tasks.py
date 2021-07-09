@@ -13,11 +13,11 @@ app.config_from_object('config', namespace='CELERY')
 app.conf.beat_schedule = {
     'crypto-notification-sst-every-5-minute': {
         'task': 'tasks.sst_notification',
-        'schedule': crontab(minute='*/5')
+        'schedule': 300
     },
     'crypto-notification-sst-price-every-2-hour': {
         'task': 'tasks.sst_price',
-        'schedule': crontab(hour='*/2')
+        'schedule': 7200
     }
 }
 
