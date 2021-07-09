@@ -1,4 +1,5 @@
 from celery import Celery
+from celery.schedules import crontab
 from app import bot
 from config import CHAT_ID, USDT, SST
 import asyncio
@@ -12,11 +13,11 @@ app.config_from_object('config', namespace='CELERY')
 app.conf.beat_schedule = {
     'crypto-notification-sst-every-5-minute': {
         'task': 'tasks.sst_notification',
-        'schedule': 300
+        'schedule': crontab(minute='*/5')
     },
-    'crypto-notification-sst-price-every-1-hour': {
+    'crypto-notification-sst-price-every-2-hour': {
         'task': 'tasks.sst_price',
-        'schedule': 3600
+        'schedule': crontab(hour='*/2')
     }
 }
 
@@ -42,23 +43,23 @@ def sst_notification():
 
 @app.task
 def sst_price():
-    msg = "**PRICE SST**\n"
+    msg = "*PRICE SST*\n"
     try:
         buy_sst_price_1inch = get_1inch_price(USDT, SST, 1000, 6)
         sell_sst_price_1inch = get_1inch_price(SST, USDT, 1000, 18, sell=True)
-        msg += f'**1inch buy price 1000 USDT:** *{buy_sst_price_1inch}*\n' \
-               f'**1inch sell price 1000 SST:** *{sell_sst_price_1inch}*\n'
+        msg += f'_1Inch buy price 1000 USDT:_ *{buy_sst_price_1inch}*\n' \
+               f'_1Inch sell price 1000 SST:_ *{sell_sst_price_1inch}*\n'
     except Exception:
-        msg += '1inch get price error\n'
+        msg += '*1Inch get price error*\n'
     try:
         coinsbit_sst_info = parse_sst()
         buy_sst_coinsbit_price = coinsbit_sst_info.get('asks')['average']
         buy_sst_amount = coinsbit_sst_info.get('asks')['amount']
         sell_sst_coinsbit_price = coinsbit_sst_info.get('bids')['average']
         sell_sst_amount = coinsbit_sst_info.get('bids')['amount']
-        msg += f'**Coinsbit buy price {buy_sst_amount} SST:** *{buy_sst_coinsbit_price}*\n' \
-               f'**Coinsbit sell price {sell_sst_amount} SST:** *{sell_sst_coinsbit_price}*\n'
+        msg += f'_Coinsbit buy price {buy_sst_amount} SST:_ *{buy_sst_coinsbit_price}*\n' \
+               f'_Coinsbit sell price {sell_sst_amount} SST:_ *{sell_sst_coinsbit_price}*\n'
     except Exception as e:
-        msg += 'coinsbit get price error\n'
+        msg += '*Coinsbit get price error*\n'
 
     asyncio.get_event_loop().run_until_complete(send_message(msg))
